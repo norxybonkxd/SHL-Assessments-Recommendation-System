@@ -1,7 +1,4 @@
-fastapi[standard]
-sentence-transformers
-torch
-
+uvicorn[standard]
 fastapi[standard]
 sentence-transformers
 torch
