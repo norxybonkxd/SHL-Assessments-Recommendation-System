@@ -2,6 +2,12 @@
 
 ## Overview
 This is an intelligent recommendation system that suggests relevant SHL assessments based on job descriptions or natural language queries. The system uses modern LLM embeddings and semantic search to match job requirements with appropriate assessment tools.
+## 🔗 Links
+
+- **Web App**: https://norxynorzy-shl-recommender.hf.space
+- **API Docs**: https://norxynorzy-shl-recommender.hf.space/docs
+
+
 
 ## System Architecture
 
