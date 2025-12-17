@@ -6,6 +6,10 @@ This is an intelligent recommendation system that suggests relevant SHL assessme
 
 - **Web App**: https://norxynorzy-shl-recommender.hf.space
 - **API Docs**: https://norxynorzy-shl-recommender.hf.space/docs
+# Contact Me
+
+- [LinkedIn](https://www.linkedin.com/in/ajay-pentakoti-840b52324/)  
+- [Gmail](mailto:ajay.pentakoti@gmail.com)
 
 
 
