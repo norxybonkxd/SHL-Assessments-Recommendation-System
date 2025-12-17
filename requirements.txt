@@ -1,0 +1,17 @@
+fastapi[standard]
+sentence-transformers
+torch
+
+fastapi[standard]
+sentence-transformers
+torch
+numpy
+pandas
+scikit-learn
+beautifulsoup4
+requests
+pydantic
+python-multipart
+google-generativeai
+chromadb
+

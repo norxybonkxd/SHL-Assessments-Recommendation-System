@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHL Recommendation System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1419;
+            min-height: 100vh;
+            display: block;
+        }
+
+        .sidebar {
+            display: none;
+        }
+
+        .sidebar-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+            color: #a0a0a0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-icon:hover {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .sidebar-icon.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .main-content {
+            margin-left: 0;
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .welcome-section {
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .welcome-title {
+            font-size: 42px;
+            font-weight: 750;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .welcome-subtitle {
+            font-size: 14px;
+            color: #ff6b6b;
+            margin-bottom: 25px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .feature-box {
+            background: rgba(102, 126, 234, 0.08);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin: 40px 0;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-box-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .quick-options {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .option-card {
+            background: #1a2332;
+            border-radius: 16px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .option-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+
+        .option-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+            width: 50px;
+            height: 50px;
+            background: rgba(102, 126, 234, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .option-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .option-description {
+            font-size: 14px;
+            color: #a0a0a0;
+            line-height: 1.5;
+        }
+
+        .option-arrow {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
+            color: #667eea;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .option-card:hover .option-arrow {
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        .suggestions-section {
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .suggestions-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .suggestions-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .show-more {
+            font-size: 13px;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .suggestion-chip {
+            background: #1a2332;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #a0a0a0;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .search-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a2332;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px 40px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #0f1419;
+            color: #ffffff;
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #666;
+        }
+
+        .search-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 18px;
+        }
+
+        .search-button:hover {
+            transform: scale(1.05);
+        }
+
+        .search-button:disabled {
+            opacity: 0.65;
+        }
+
+        .main-content-wrapper {
+            padding-bottom: 80px;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .result-count {
+            background: #667eea;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-left: 10px;
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .result-card {
+            background: #1a2332;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .result-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .result-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .result-content {
+            flex: 1;
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .result-score {
+            display: inline-block;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .result-description {
+            font-size: 14px;
+            color: #a0a0a0;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .result-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .result-link:hover {
+            text-decoration: underline;
+        }
+
+        .more-details-toggle {
+            color: #667eea;
+            background: none;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .more-details-toggle:hover {
+            color: #764ba2;
+        }
+
+        .more-details-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .more-details-content.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 13px;
+            color: #ffffff;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-state {
+            background: rgba(198, 40, 40, 0.1);
+            border: 1px solid #ef5350;
+            border-radius: 12px;
+            padding: 16px;
+            color: #ef5350;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .main-content {
+                margin-left: 60px;
+                padding: 20px;
+            }
+
+            .search-section {
+                left: 60px;
+                padding: 15px 20px;
+            }
+
+            .quick-options {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-title {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-icon active">H</div>
+        <div class="sidebar-icon">+</div>
+        <div class="sidebar-icon">?</div>
+        <div class="sidebar-icon">B</div>
+        <div class="sidebar-icon">G</div>
+        <div style="flex: 1;"></div>
+        <div class="sidebar-icon">S</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="main-content-wrapper">
+            <div class="container">
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <div class="welcome-title">SHL Recommendation System</div>
+                    <div class="welcome-subtitle">Internship Assignment Purpose Only</div>
+
+                    <!-- Feature Box -->
+                    <div class="feature-box">
+                        <div class="feature-box-text">Assessment Recommendation Engine using SHL's product catalogue</div>
+                    </div>
+
+              
+
+                <!-- Suggestions Section -->
+               
+
+                <!-- Results Section -->
+                <div id="results" class="results-section"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-section">
+        <input 
+            id="queryInput"
+            type="text"
+            class="search-input"
+            placeholder="Ask anything about assessments..."
+            onkeypress="handleKeyPress(event)"
+            autocomplete="off"
+        >
+        <button class="search-button" id="btn-search" onclick="searchAssessments()">⌕</button>
+    </div>
+
+    <script>
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchAssessments();
+            }
+        }
+
+        function toggleDetails(button) {
+            const detailsContent = button.nextElementSibling;
+            detailsContent.classList.toggle('active');
+            button.style.color = detailsContent.classList.contains('active') ? '#764ba2' : '#667eea';
+        }
+
+        function setExample(text) {
+            document.getElementById('queryInput').value = text;
+            searchAssessments();
+        }
+
+        async function searchAssessments() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) {
+                alert("Please describe an assessment need");
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            const btn = document.getElementById('btn-search');
+
+            resultsDiv.innerHTML = `
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <div>Searching assessments...</div>
+                </div>
+            `;
+            resultsDiv.classList.add('active');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query, top_k: 10 })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || `Error: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const recommendations = data.recommended_assessments || data;
+
+                if (!recommendations || recommendations.length === 0) {
+                    resultsDiv.innerHTML = `<div class="empty-state">No matching assessments found. Try different keywords.</div>`;
+                    return;
+}
+
+                let html = `<div class="results-header">Recommended Assessments <span class="result-count">${recommendations.length} found</span></div><div class="results-grid">`;
+
+                recommendations.forEach((item, idx) => {
+                    html += `
+                        <div class="result-card">
+                            <div class="result-header">
+                                <div class="result-number">${idx + 1}</div>
+                                <div class="result-content">
+                                    <div class="result-title">${item.name}</div>
+                                    <div class="result-score">Match: ${(item.score * 100).toFixed(0)}%</div>
+                                    <div class="result-description">${item.description || 'Professional assessment'}</div>
+                                    <a href="${item.url}" target="_blank" class="result-link">View Assessment</a>
+                                    <button class="more-details-toggle" onclick="toggleDetails(this)">
+                                        <span>More Details</span>
+                                        <span style="font-size: 10px;">▼</span>
+                                    </button>
+                                    <div class="more-details-content">
+                                        ${item.job_levels ? `<div class="detail-item"><div class="detail-label">Job Levels</div><div class="detail-value">${item.job_levels}</div></div>` : ''}
+                                        ${item.languages ? `<div class="detail-item"><div class="detail-label">Languages</div><div class="detail-value">${item.languages}</div></div>` : ''}
+                                        ${item.length_minutes ? `<div class="detail-item"><div class="detail-label">Duration</div><div class="detail-value">${item.length_minutes} mins</div></div>` : ''}
+                                        ${item.remote_testing ? `<div class="detail-item"><div class="detail-label">Remote Testing</div><div class="detail-value">${item.remote_testing}</div></div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error-state">Error: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        window.addEventListener('load', () => {
+            document.getElementById('queryInput').focus();
+        });
+    </script>
+</body>
+</html>
